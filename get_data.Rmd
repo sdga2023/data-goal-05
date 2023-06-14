@@ -1,0 +1,216 @@
+---
+title: "Data and clean"
+author: "Divyanshi Wadhwa"
+date: '2023-06-13'
+output: html_document
+---
+
+### Set up
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(wbstats)
+library(openxlsx)
+library(reshape2)
+
+wb <- createWorkbook()
+```
+
+### Time use country data
+This data sheet "gender_time_use" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c4
+note: link needs to be updated on friday!!
+```{r}
+
+# Time use data from WDI
+tu <- wb_data(country = "countries_only",
+         indicator = c("SG.TIM.UWRK.FE", "SG.TIM.UWRK.MA"),
+         start_date = 2010, end_date = 2022) %>%
+  select(-iso2c) %>%
+  melt(id = c("iso3c", "country", "date")) %>%
+  filter(!is.na(value)) %>%
+  group_by(iso3c, country, variable) %>%
+  filter(date == max(date)) %>%
+  ungroup() %>%
+  mutate(variable = as.character(variable),
+    variable = ifelse(variable == "SG.TIM.UWRK.FE", "female%", variable),
+         variable = ifelse(variable == "SG.TIM.UWRK.MA", "male%", variable)) %>%
+  spread(variable, value) %>%
+  mutate(male = 24*`male%`/100,
+         female = 24*`female%`/100)
+
+addWorksheet(wb, "gender_time_use")
+writeData(wb, "gender_time_use", tu, startRow = 1, startCol = 1)
+
+```
+
+### Water fetching country data
+Data was extracted from Safely managed drinking water - thematic report on drinking water 2017. Geneva, Switzerland: World Health Organization; 2017. Page 31. Link: https://data.unicef.org/wp-content/uploads/2017/03/safely-managed-drinking-water-JMP-2017-1.pdf 
+This data sheet "water_fetching" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c7 
+note: link needs to be updated on friday!!
+
+The data was only available in PDF format so was extracted into the Data folder of this repository.
+```{r}
+wf <- read.csv("Input Data/water-fetching.csv")
+
+addWorksheet(wb, "water_fetching")
+writeData(wb, "water_fetching", wf, startRow = 1, startCol = 1)
+
+```
+
+### Water fetching - Uganda case study
+To be completed! Check with Dominikus and Akito soon.
+
+
+### Child marriage country data
+This data sheet "child_marriage" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c16
+note: link needs to be updated on friday!!
+```{r}
+cm <- wb_data(country = "countries_only",
+         indicator = c("SP.M15.2024.FE.ZS", "SP.M18.2024.FE.ZS"),
+         start_date = 2010, end_date = 2022) %>%
+  select(-iso2c) %>%
+  melt(id = c("iso3c", "country", "date")) %>%
+  filter(!is.na(value)) %>%
+  group_by(iso3c, country, variable) %>%
+  filter(date == max(date)) %>%
+  ungroup() %>%
+  mutate(variable = as.character(variable),
+         variable = ifelse(variable == "SP.M15.2024.FE.ZS", "married_by_15", variable),
+         variable = ifelse(variable == "SP.M18.2024.FE.ZS", "married_by_18", variable)) %>%
+  spread(variable, value) %>%
+  select(-date)
+
+addWorksheet(wb, "child_marriage")
+writeData(wb, "child_marriage", cm, startRow = 1, startCol = 1)
+
+```
+
+
+### Intimate partner violence country data
+This data sheet "domestic_violence" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c27 
+note: this part needs to be updated!
+```{r}
+
+dv <- wb_data(country = "countries_only",
+         indicator = "SG.VAW.IPVE.ZS",
+         start_date = 2010, end_date = 2022) %>%
+  select(-c(iso2c, unit, obs_status, footnote, last_updated)) %>%
+  melt(id = c("iso3c", "country", "date")) %>%
+  filter(!is.na(value)) %>%
+  group_by(iso3c, country, variable) %>%
+  filter(date == max(date)) %>%
+  ungroup() %>%
+  rename(code = iso3c,
+         median = value)
+
+
+addWorksheet(wb, "domestic_violence")
+writeData(wb, "domestic_violence", dv, startRow = 1, startCol = 1)
+
+```
+
+### Green jobs country data
+Data was made available on request. It has been added to the Data folder for this repository. The code below accesses it from this repository and adds it to the data file.
+This data sheet "greening" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c39 
+note: this part needs to be updated!
+```{r}
+gjper <- read.xlsx("Input data/Impact of Greening by country and gender in ECA.xlsx", sheet = 1) %>%
+  mutate(type = "percentage") %>%
+  mutate(total.total = NA,
+         total.male = NA,
+         total.female = NA)
+
+gjnum <- read.xlsx("Input data/Impact of Greening by country and gender in ECA.xlsx", sheet = 2) %>%
+  mutate(type = "absolute",
+         total.unaffected = total.total - total.green - total.brown - total.change,
+         male.unaffected = total.male - male.green - male.brown - male.change,
+         female.unaffected = total.female - female.green - female.brown - female.change) %>%
+  mutate(gap.green = NA,
+         gap.brown = NA,
+         gap.change = NA,
+         gap.retraining = NA,
+         gap.skill.gap = NA,
+         gap.unaffected = NA)
+
+gj <- rbind(gjper, gjnum)
+
+addWorksheet(wb, "greening")
+writeData(wb, "greening", gj, startRow = 1, startCol = 1)
+```
+
+
+### Field of tertiary education country data
+This data sheet "graduate_shares" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c41 
+note: link needs to be updated on friday!!
+```{r}
+
+field <- wb_data(country = "countries_only",
+         indicator = c("SE.TER.GRAD.FE.AG.ZS", "SE.TER.GRAD.FE.HU.ZS", "SE.TER.GRAD.FE.ED.ZS", "SE.TER.GRAD.FE.EN.ZS",
+         "SE.TER.GRAD.FE.HL.ZS", "SE.TER.GRAD.FE.SC.ZS", "SE.TER.GRAD.FE.SI.ZS", "SE.TER.GRAD.FE.SV.ZS", "SE.TER.GRAD.FE.SS.ZS", "SE.TER.GRAD.FE.OT.ZS"),
+         start_date = 2010, end_date = 2022) %>%
+  select(-c(iso2c)) %>%
+  melt(id = c("iso3c", "country", "date")) %>%
+  filter(!is.na(value)) %>%
+  group_by(iso3c, country, variable) %>%
+  filter(date == max(date)) %>%
+  ungroup() %>%
+  mutate(variable = ifelse(variable == "SE.TER.GRAD.FE.AG.ZS", "Agriculture, Forestry, Fisheries and Veterinary", variable),
+         variable = ifelse(variable == "SE.TER.GRAD.FE.ED.ZS", "Education", variable),
+         variable = ifelse(variable == "SE.TER.GRAD.FE.HU.ZS", "Arts and Humanities", variable),
+         variable = ifelse(variable == "SE.TER.GRAD.FE.EN.ZS", "Engineering, manufacturing and construction", variable),
+         variable = ifelse(variable == "SE.TER.GRAD.FE.HL.ZS", "Health and welfare", variable),
+         variable = ifelse(variable == "SE.TER.GRAD.FE.SC.ZS", "Natural Sciences, Mathematics and Statistics", variable),
+         variable = ifelse(variable == "SE.TER.GRAD.FE.SI.ZS", "Science, Technology, Engineering and Mathematics (STEM)", variable),
+         variable = ifelse(variable == "SE.TER.GRAD.FE.SV.ZS", "Services", variable),
+         variable = ifelse(variable == "SE.TER.GRAD.FE.SS.ZS", "Social Sciences, Journalism and Information", variable),
+         variable = ifelse(variable == "SE.TER.GRAD.FE.OT.ZS", "Unknown or unspecified fields", variable)) %>%
+  rename(`Country Name` = country,
+         `Country Code` = iso3c,
+         Year = date,
+         Value = value,
+         Disaggregation = variable)
+
+addWorksheet(wb, "graduate_shares")
+writeData(wb, "graduate_shares", field, startRow = 1, startCol = 1)
+
+```
+
+### Top performers interest in pursuing STEM country data
+Download file from: https://www.unicef.org/globalinsight/stories/mapping-gender-equality-stem-school-work for chart with title "Per cent of top-performers in math and science in secondary who aspire to a science and engineering career".
+This data sheet "top_performers" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c43 
+note: this part needs to be updated!
+```{r}
+meta <- wb_data(country = "countries_only",
+         indicator = c("SP.POP.TOTL"),
+         start_date = 2022, end_date = 2022) %>%
+  select(iso3c, country)
+
+tp <- read_csv("Input data/Critical evaluation skills.csv")
+colnames(tp)[1] <- "country"
+tp <- tp %>%
+  mutate(country = ifelse(country == "Brunei", "Brunei Darussalam", country),
+         country = ifelse(country == "Czech Rep", "Czechia", country),
+         country = ifelse(country == "Hong Kong", "Hong Kong SAR, China", country),
+         country = ifelse(country == "Korea", "Korea, Rep.", country),
+         country = ifelse(country == "Macao", "Macao SAR, China", country),
+         country = ifelse(country == "Russia", "Russian Federation", country),
+         country = ifelse(country == "Slovak Rep", "Slovak Republic", country),
+         country = ifelse(country == "Turkey", "Turkiye", country),
+         country = ifelse(country == "UAE", "United Arab Emirates", country),
+         country = ifelse(country == "UK", "United Kingdom", country),
+         country = ifelse(country == "USA", "United States", country),
+         country = ifelse(country == "Viet Nam", "Vietnam", country))
+
+tp <- merge(tp, meta, by = "country", all.x = T)
+tp$iso3c <- ifelse(tp$country == "Taiwan", "TWN", tp$iso3c)
+
+addWorksheet(wb, "top_performers")
+writeData(wb, "top_performers", tp, startRow = 1, startCol = 1)
+```
+
+saving data file
+```{r}
+saveWorkbook(wb, file = "goal 05.data.xlsx", overwrite = TRUE)
+
+```
