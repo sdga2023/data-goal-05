@@ -18,8 +18,8 @@ wb <- createWorkbook()
 ```
 
 ### Time use country data
-This data sheet "gender_time_use" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c4
-note: link needs to be updated on friday!!
+This data sheet "gender_time_use" is used to create chart: https://sdga2022.github.io/sdga2022/goal-5-gender-equality#c4 
+
 ```{r}
 
 # Time use data from WDI
@@ -46,8 +46,7 @@ writeData(wb, "gender_time_use", tu, startRow = 1, startCol = 1)
 
 ### Water fetching country data
 Data was extracted from Safely managed drinking water - thematic report on drinking water 2017. Geneva, Switzerland: World Health Organization; 2017. Page 31. Link: https://data.unicef.org/wp-content/uploads/2017/03/safely-managed-drinking-water-JMP-2017-1.pdf 
-This data sheet "water_fetching" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c7 
-note: link needs to be updated on friday!!
+This data sheet "water_fetching" is used to create chart: https://sdga2022.github.io/sdga2022/goal-5-gender-equality#c7
 
 The data was only available in PDF format so was extracted into the Data folder of this repository.
 ```{r}
@@ -59,12 +58,13 @@ writeData(wb, "water_fetching", wf, startRow = 1, startCol = 1)
 ```
 
 ### Water fetching - Uganda case study
-To be completed! Check with Dominikus and Akito soon.
+This data has been put together in the folder "who-walks-for-water".
+This data sheet "child_marriage" is used to create chart: https://datatopics.worldbank.org/sdgatlas/goal-5-gender-equality#c11s0 
 
 
 ### Child marriage country data
-This data sheet "child_marriage" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c16
-note: link needs to be updated on friday!!
+This data sheet "child_marriage" is used to create chart: https://datatopics.worldbank.org/sdgatlas/goal-5-gender-equality#c16 
+
 ```{r}
 cm <- wb_data(country = "countries_only",
          indicator = c("SP.M15.2024.FE.ZS", "SP.M18.2024.FE.ZS"),
@@ -88,8 +88,8 @@ writeData(wb, "child_marriage", cm, startRow = 1, startCol = 1)
 
 
 ### Intimate partner violence country data
-This data sheet "domestic_violence" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c27 
-note: this part needs to be updated!
+This data sheet "domestic_violence" is used to create chart: https://datatopics.worldbank.org/sdgatlas/goal-5-gender-equality#c27
+
 ```{r}
 
 dv <- wb_data(country = "countries_only",
@@ -112,8 +112,8 @@ writeData(wb, "domestic_violence", dv, startRow = 1, startCol = 1)
 
 ### Green jobs country data
 Data was made available on request. It has been added to the Data folder for this repository. The code below accesses it from this repository and adds it to the data file.
-This data sheet "greening" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c39 
-note: this part needs to be updated!
+This data sheet "greening" is used to create chart: https://datatopics.worldbank.org/sdgatlas/goal-5-gender-equality#c39s0
+
 ```{r}
 gjper <- read.xlsx("Input data/Impact of Greening by country and gender in ECA.xlsx", sheet = 1) %>%
   mutate(type = "percentage") %>%
@@ -141,8 +141,8 @@ writeData(wb, "greening", gj, startRow = 1, startCol = 1)
 
 
 ### Field of tertiary education country data
-This data sheet "graduate_shares" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c41 
-note: link needs to be updated on friday!!
+This data sheet "graduate_shares" is used to create chart: https://datatopics.worldbank.org/sdgatlas/goal-5-gender-equality#c41 
+
 ```{r}
 
 field <- wb_data(country = "countries_only",
@@ -178,8 +178,8 @@ writeData(wb, "graduate_shares", field, startRow = 1, startCol = 1)
 
 ### Top performers interest in pursuing STEM country data
 Download file from: https://www.unicef.org/globalinsight/stories/mapping-gender-equality-stem-school-work for chart with title "Per cent of top-performers in math and science in secondary who aspire to a science and engineering career".
-This data sheet "top_performers" is used to create chart: https://sdga2022.github.io/sdga2022/goals/goal5#c43 
-note: this part needs to be updated!
+This data sheet "top_performers" is used to create chart: https://datatopics.worldbank.org/sdgatlas/goal-5-gender-equality#c43
+
 ```{r}
 meta <- wb_data(country = "countries_only",
          indicator = c("SP.POP.TOTL"),
